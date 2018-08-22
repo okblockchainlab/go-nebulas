@@ -37,7 +37,7 @@ normal.db*
 # 3rd test suites.
 mozilla_js_tests*
 
-#keydir
+keydir/*
 
 #node_modules
 node_modules
@@ -52,3 +52,6 @@ memprofile.log
 
 #testnet
 testnet/conf/network.key
+
+libdownload/*
+depslib/*
