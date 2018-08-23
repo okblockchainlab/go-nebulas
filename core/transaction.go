@@ -249,6 +249,78 @@ func (tx *Transaction) FromProto(msg proto.Message) error {
 	return ErrInvalidProtoToTransaction
 }
 
+// FromProtoWithoutAlgCheck converts proto Tx into domain Tx, without checking alg field.
+func (tx *Transaction)FromProtoWithoutAlgCheck(msg proto.Message) error {
+	if msg, ok := msg.(*corepb.Transaction); ok {
+		if msg != nil {
+			tx.hash = msg.Hash
+			from, err := AddressParseFromBytes(msg.From)
+			if err != nil {
+				return err
+			}
+			tx.from = from
+
+			to, err := AddressParseFromBytes(msg.To)
+			if err != nil {
+				return err
+			}
+			tx.to = to
+
+			value, err := util.NewUint128FromFixedSizeByteSlice(msg.Value)
+			if err != nil {
+				return err
+			}
+			tx.value = value
+
+			tx.nonce = msg.Nonce
+			tx.timestamp = msg.Timestamp
+			tx.chainID = msg.ChainId
+
+			if msg.Data == nil {
+				return ErrInvalidTransactionData
+			}
+			if len(msg.Data.Payload) > MaxDataPayLoadLength {
+				return ErrTxDataPayLoadOutOfMaxLength
+			}
+			if CheckGenesisTransaction(tx) == false &&
+				msg.Data.Type == TxPayloadBinaryType &&
+				len(msg.Data.Payload) > MaxDataBinPayloadLength {
+				return ErrTxDataBinPayLoadOutOfMaxLength
+			}
+			tx.data = msg.Data
+
+			gasPrice, err := util.NewUint128FromFixedSizeByteSlice(msg.GasPrice)
+			if err != nil {
+				return err
+			}
+			if gasPrice.Cmp(util.Uint128Zero()) <= 0 || gasPrice.Cmp(TransactionMaxGasPrice) > 0 {
+				return ErrInvalidGasPrice
+			}
+			tx.gasPrice = gasPrice
+
+			gasLimit, err := util.NewUint128FromFixedSizeByteSlice(msg.GasLimit)
+			if err != nil {
+				return err
+			}
+			if gasLimit.Cmp(util.Uint128Zero()) <= 0 || gasLimit.Cmp(TransactionMaxGas) > 0 {
+				return ErrInvalidGasLimit
+			}
+			tx.gasLimit = gasLimit
+
+			alg := keystore.Algorithm(msg.Alg)
+			//if err := crypto.CheckAlgorithm(alg); err != nil {
+				//return err
+			//}
+
+			tx.alg = alg
+			tx.sign = msg.Sign
+			return nil
+		}
+		return ErrInvalidProtoToTransaction
+	}
+	return ErrInvalidProtoToTransaction
+}
+
 func (tx *Transaction) String() string {
 	return fmt.Sprintf(`{"chainID":%d, "hash":"%s", "from":"%s", "to":"%s", "nonce":%d, "value":"%s", "timestamp":%d, "gasprice": "%s", "gaslimit":"%s", "data": "%s", "type":"%s"}`,
 		tx.chainID,

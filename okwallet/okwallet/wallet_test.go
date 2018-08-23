@@ -37,13 +37,25 @@ func TestCreateRawTransaction(t *testing.T) {
 	gasPrice := `1000000`
 	gasLimit := `2000000`
 	binary := ""
-	const expect = `121a19578fa4152b27a53c34eb79718e722f5631fcd1daa90b94b66f1a1a1957200c68cba489da88c9c8887df46ce13a9024c1c31c55ca7a221000000000000000000de0b6b3a764000028e80730d4dbf8db053a080a0662696e617279400b4a10000000000000000000000000000f42405210000000000000000000000000001e8480`
+	//const expect = `121a19578fa4152b27a53c34eb79718e722f5631fcd1daa90b94b66f1a1a1957200c68cba489da88c9c8887df46ce13a9024c1c31c55ca7a221000000000000000000de0b6b3a764000028e80730d4dbf8db053a080a0662696e617279400b4a10000000000000000000000000000f42405210000000000000000000000000001e8480`
 
-	rawTx, err := CreateRawTransaction("11", from, to, value, nonce, gasPrice, gasLimit, binary)
+	_, err := CreateRawTransaction("11", from, to, value, nonce, gasPrice, gasLimit, binary)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if expect != rawTx {
-		t.Fatal("CreateRawTransaction failed. exptect result " + expect + " but return " + rawTx)
-	}
+}
+
+func TestSignRawTransaction(t * testing.T) {
+  rawTx := `121a19578fa4152b27a53c34eb79718e722f5631fcd1daa90b94b66f1a1a1957200c68cba489da88c9c8887df46ce13a9024c1c31c55ca7a221000000000000000000de0b6b3a764000028e80730c5fcf9db053a080a0662696e617279400b4a10000000000000000000000000000f42405210000000000000000000000000001e8480`
+  prvkey := `c9312e9c279309ec9df68bd374124676f2bf9d050a53c6fab35045c62d15cc9c`
+  const expect = `CiB5zayUNvggLWsvDOxZvji0q6ZuWwZNxdUGmt//lzERTxIaGVePpBUrJ6U8NOt5cY5yL1Yx/NHaqQuUtm8aGhlXIAxoy6SJ2ojJyIh99GzhOpAkwcMcVcp6IhAAAAAAAAAAAA3gtrOnZAAAKOgHMMX8+dsFOggKBmJpbmFyeUALShAAAAAAAAAAAAAAAAAAD0JAUhAAAAAAAAAAAAAAAAAAHoSAWAFiQSAKMhXLBMiyM7xGIEc5V+8AH1Mox+LukwN0MnUNCmxbYTzZuDStZmW3nUNCrTpZyAjCguidHrFAW0ZY8wu7Q+4B`
+
+  signedTx, err := SignRawTransaction(rawTx, prvkey)
+  if err != nil {
+    t.Fatal(err)
+  }
+
+  if expect != signedTx {
+		t.Fatal("SignRawTransaction failed. exptect result " + expect + " but return " + signedTx)
+  }
 }
