@@ -169,8 +169,6 @@ func SignRawTransaction(rawTx, prvkeyStr string) (string, error) {
   }
 
 	// check sign addr is tx's from addr
-  fmt.Println(addr.String())
-  fmt.Println(tx.From().String())
 	if !tx.From().Equals(addr) {
 		return "", errors.New("transaction sign not use from address")
 	}
