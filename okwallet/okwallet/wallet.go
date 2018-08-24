@@ -1,18 +1,18 @@
 package okwallet
 
 import (
+	"encoding/base64"
 	"encoding/hex"
-  "encoding/base64"
 	"errors"
+	"fmt"
 	"strconv"
-  "fmt"
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/nebulasio/go-nebulas/core"
+	"github.com/nebulasio/go-nebulas/core/pb"
 	"github.com/nebulasio/go-nebulas/crypto"
 	"github.com/nebulasio/go-nebulas/crypto/keystore"
 	"github.com/nebulasio/go-nebulas/util"
-	"github.com/nebulasio/go-nebulas/core/pb"
 )
 
 func getBinaryPayload(binaryStr string) (string, []byte, error) {
@@ -88,11 +88,11 @@ func privateKeyFromString(keyStr string) (keystore.PrivateKey, error) {
 		return nil, err
 	}
 
-  return key, nil
+	return key, nil
 }
 
 func getAddress(privkeyStr string) (*core.Address, error) {
-  priv, err := privateKeyFromString(privkeyStr)
+	priv, err := privateKeyFromString(privkeyStr)
 	if err != nil {
 		return nil, err
 	}
@@ -107,17 +107,17 @@ func getAddress(privkeyStr string) (*core.Address, error) {
 		return nil, err
 	}
 
-  return addr, nil
+	return addr, nil
 }
 
 //reference: Manager.NewAccount
 func GetAddressByPrivateKey(privkeyStr string) (string, error) {
-  addr, err := getAddress(privkeyStr)
-  if err != nil {
-    return "", err
-  }
+	addr, err := getAddress(privkeyStr)
+	if err != nil {
+		return "", err
+	}
 
-  return addr.String(), nil
+	return addr.String(), nil
 }
 
 //reference: AdminService.SignTransactionWithPassphrase
@@ -141,51 +141,51 @@ func CreateRawTransaction(chainIDStr, from, to, value, nonce, gasPrice, gasLimit
 		return "", err
 	}
 
-  //resp := rpcpb.SignTransactionPassphraseResponse{Data:data}
-  //resp.String
+	//resp := rpcpb.SignTransactionPassphraseResponse{Data:data}
+	//resp.String
 
 	return hex.EncodeToString(data), nil
 }
 
 //reference: APIService.SendRawTransaction, AdminService.SignTransactionWithPassphrase
 func SignRawTransaction(rawTx, prvkeyStr string) (string, error) {
-  rawTxByte, err := hex.DecodeString(rawTx)
-  if err != nil {
-    return "", fmt.Errorf("invalid rawtx data: %v", err)
-  }
+	rawTxByte, err := hex.DecodeString(rawTx)
+	if err != nil {
+		return "", fmt.Errorf("invalid rawtx data: %v", err)
+	}
 
 	pbTx := new(corepb.Transaction)
 	if err := proto.Unmarshal(rawTxByte, pbTx); err != nil {
 		return "", err
 	}
-  tx := new(core.Transaction)
+	tx := new(core.Transaction)
 	if err := tx.FromProtoWithoutAlgCheck(pbTx); err != nil {
 		return "", err
 	}
 
-  addr, err := getAddress(prvkeyStr)
-  if err != nil {
-    return "", err
-  }
+	addr, err := getAddress(prvkeyStr)
+	if err != nil {
+		return "", err
+	}
 
 	// check sign addr is tx's from addr
 	if !tx.From().Equals(addr) {
 		return "", errors.New("transaction sign not use from address")
 	}
 
-  key, err := privateKeyFromString(prvkeyStr)
-  if err != nil {
-    return "", err
-  }
+	key, err := privateKeyFromString(prvkeyStr)
+	if err != nil {
+		return "", err
+	}
 
 	signature, err := crypto.NewSignature(keystore.SECP256K1)
 	if err != nil {
 		return "", err
 	}
 	signature.InitSign(key)
-  if err = tx.Sign(signature); err != nil {
-    return "", err
-  }
+	if err = tx.Sign(signature); err != nil {
+		return "", err
+	}
 
 	pbMsg, err := tx.ToProto()
 	if err != nil {
@@ -196,5 +196,5 @@ func SignRawTransaction(rawTx, prvkeyStr string) (string, error) {
 		return "", err
 	}
 
-  return base64.StdEncoding.EncodeToString(data), nil
+	return base64.StdEncoding.EncodeToString(data), nil
 }
