@@ -36,7 +36,7 @@ case "$TARGET_OS" in
   exit 1
 esac
 
-export CGO_LDFLAGS="-L$COIN_DEPS/rocksdb/lib -L$COIN_DEPS/snappy/lib"
+export CGO_LDFLAGS="-L$COIN_DEPS/rocksdb/lib -L$COIN_DEPS/snappy/lib -L$COIN_DEPS/snappy/lib64 -L$COIN_DEPS/bzip2/lib"
 
 
 go build -o libneb.${EXT} -buildmode=c-shared -ldflags="${ldflags}" ./okwallet/libneb

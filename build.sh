@@ -27,6 +27,10 @@ if [ ! -d ./snappy ];then
         mkdir snappy
 fi
 
+if [ ! -d ./bzip2 ];then
+        mkdir bzip2 
+fi
+
 
 cd $LIBDOWNLOAD
 
@@ -47,7 +51,7 @@ if [ ! -d ./rocksdb-rocksdb-5.14.3 ];then
 fi
 
 cd rocksdb-rocksdb-5.14.3
-make static_lib
+CFLAGS="-fno-strict-aliasing -fPIC" make static_lib
 INSTALL_PATH=$COIN_DEPS/rocksdb make install-static
 
 
@@ -70,10 +74,34 @@ if [ ! -d ./snappy-1.1.7 ];then
 fi
 
 cd snappy-1.1.7
-mkdir build && cd build
+mkdir build
+cd build
 cmake -DCMAKE_INSTALL_PREFIX=$COIN_DEPS/snappy ..
 make
 make install
+
+
+cd $LIBDOWNLOAD
+
+if [ ! -f ./bzip2-1.0.2.tar.gz ];then
+        wget ftp://sources.redhat.com/pub/bzip2/v102/bzip2-1.0.2.tar.gz
+        if [ ! -f ./bzip2-1.0.2.tar.gz ];then
+                echo "Error cannot download bzip2-1.0.2.tar.gz" >&2
+                exit 1
+        fi
+fi
+
+if [ ! -d ./bzip2-1.0.2 ];then
+        tar xf bzip2-1.0.2.tar.gz
+        if [ ! -d bzip2-1.0.2 ];then
+                echo "Error cannot tar xf bzip2-1.0.2.tar.gz"
+                exit 1
+        fi
+fi
+
+cd bzip2-1.0.2
+make libbz2.a && make install PREFIX=$COIN_DEPS/bzip2
+
 
 cd $LIBDOWNLOAD/..
 
