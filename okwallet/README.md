@@ -20,3 +20,5 @@ ls *.dylib
 
 ### 其它注意项
 - createrawtransaction 每次生成的tx的timestamp不一样，所以会导致同样的输入，输出会有细微的差别
+- 关于生成生发送tx详细步聚的官文档:https://github.com/nebulasio/wiki/blob/master/tutorials/%5BEnglish%5D%20Nebulas%20101%20-%2002%20Transaction.md
+- 测试水龙头:https://testnet.nebulas.io/claim/
